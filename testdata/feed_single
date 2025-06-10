@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Test Feed</title>
+  <id>https://example.com/feed</id>
+  <updated>2025-06-01T12:00:00Z</updated>
+  <subtitle>Test RSS Feed</subtitle>
+  <link href="https://example.com/feed"></link>
+  <author>
+    <name>Feed Author</name>
+  </author>
+  <entry>
+    <title>Test Article</title>
+    <updated>2025-06-01T00:00:00Z</updated>
+    <id>https://example.com/article1</id>
+    <link href="https://example.com/article1" rel="alternate"></link>
+    <summary type="html">This is a test article&#xA;&#xA;Tags: [go testing]&#xA;&#xA;Site: example.com</summary>
+    <author>
+      <name>John Doe</name>
+    </author>
+  </entry>
+</feed>

@@ -1,0 +1,82 @@
+package clippingsfeed
+
+import (
+	"fmt"
+	"os"
+	"time"
+
+	"github.com/gorilla/feeds"
+)
+
+type FeedConfig struct {
+	Title       string
+	Link        string
+	Description string
+	Author      string
+	Created     time.Time
+}
+
+func GenerateFeed(metadata []Metadata, config FeedConfig) (*feeds.Feed, error) {
+	feed := &feeds.Feed{
+		Title:       config.Title,
+		Link:        &feeds.Link{Href: config.Link},
+		Description: config.Description,
+		Author:      &feeds.Author{Name: config.Author},
+		Created:     config.Created,
+	}
+
+	for _, meta := range metadata {
+		published, err := time.Parse("2006-01-02", meta.Published)
+		if err != nil {
+			published = meta.Created
+		}
+
+		item := &feeds.Item{
+			Title:       meta.Title,
+			Link:        &feeds.Link{Href: meta.Source},
+			Description: meta.Description,
+			Author:      &feeds.Author{Name: meta.Author},
+			Created:     published,
+			Id:          meta.Source,
+		}
+
+		if len(meta.Tags) > 0 {
+			item.Description += fmt.Sprintf("\n\nTags: %v", meta.Tags)
+		}
+
+		if meta.Site != "" {
+			item.Description += fmt.Sprintf("\n\nSite: %s", meta.Site)
+		}
+
+		feed.Items = append(feed.Items, item)
+	}
+
+	return feed, nil
+}
+
+func WriteFeedToFile(feed *feeds.Feed, filename string, format string) error {
+	var feedContent string
+	var err error
+
+	switch format {
+	case "rss":
+		feedContent, err = feed.ToRss()
+	case "atom":
+		feedContent, err = feed.ToAtom()
+	case "json":
+		feedContent, err = feed.ToJSON()
+	default:
+		return fmt.Errorf("unsupported format: %s", format)
+	}
+
+	if err != nil {
+		return fmt.Errorf("failed to generate feed: %w", err)
+	}
+
+	err = os.WriteFile(filename, []byte(feedContent), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write file: %w", err)
+	}
+
+	return nil
+}

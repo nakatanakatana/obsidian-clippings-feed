@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Multi Article Feed</title>
+  <id>https://example.com/multi-feed</id>
+  <updated>2025-06-01T12:00:00Z</updated>
+  <subtitle>Feed with multiple articles</subtitle>
+  <link href="https://example.com/multi-feed"></link>
+  <author>
+    <name>Multi Feed Author</name>
+  </author>
+  <entry>
+    <title>First Article</title>
+    <updated>2025-06-01T00:00:00Z</updated>
+    <id>https://example.com/article1</id>
+    <link href="https://example.com/article1" rel="alternate"></link>
+    <summary type="html">First test article&#xA;&#xA;Tags: [go web]&#xA;&#xA;Site: example.com</summary>
+    <author>
+      <name>Author One</name>
+    </author>
+  </entry>
+  <entry>
+    <title>Second Article</title>
+    <updated>2025-06-02T00:00:00Z</updated>
+    <id>https://example.com/article2</id>
+    <link href="https://example.com/article2" rel="alternate"></link>
+    <summary type="html">Second test article&#xA;&#xA;Tags: [testing feed]&#xA;&#xA;Site: example.com</summary>
+    <author>
+      <name>Author Two</name>
+    </author>
+  </entry>
+</feed>
