@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 env:
-  IMAGE_NAME: obsidian-feed
+  IMAGE_NAME: obsidian-clippings-feed
 
 jobs:
   push_to_registry:
@@ -27,7 +27,8 @@ jobs:
         with:
           context: .
           push: true
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
+          # platforms: linux/amd64,linux/arm64
           tags: |
             ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
             ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
@@ -36,7 +37,8 @@ jobs:
         with:
           context: livesync-bridge
           push: true
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
+          # platforms: linux/amd64,linux/arm64
           tags: |
             ghcr.io/${{ github.repository_owner }}/livesync-bridge:${{ github.ref_name }},
             ghcr.io/${{ github.repository_owner }}/livesync-bridge:latest

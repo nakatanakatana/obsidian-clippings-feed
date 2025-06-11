@@ -8,7 +8,7 @@ on:
       - 'v*'
 
 env:
-  IMAGE_NAME: obsidian-feed
+  IMAGE_NAME: obsidian-clippings-feed
 
 jobs:
   push_to_registry:
