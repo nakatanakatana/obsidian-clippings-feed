@@ -9,7 +9,7 @@
   </author>
   <entry>
     <title>Test Article</title>
-    <updated>2025-06-01T00:00:00Z</updated>
+    <updated>2025-06-01T12:00:00Z</updated>
     <id>https://example.com/article1</id>
     <link href="https://example.com/article1" rel="alternate"></link>
     <summary type="html">This is a test article&#xA;&#xA;Author(s): John Doe&#xA;&#xA;Tags: [go testing]&#xA;&#xA;Site: example.com</summary>

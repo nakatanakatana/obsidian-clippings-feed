@@ -9,7 +9,7 @@
   </author>
   <entry>
     <title>First Article</title>
-    <updated>2025-06-01T00:00:00Z</updated>
+    <updated>2025-06-01T12:00:00Z</updated>
     <id>https://example.com/article1</id>
     <link href="https://example.com/article1" rel="alternate"></link>
     <summary type="html">First test article&#xA;&#xA;Author(s): Author One&#xA;&#xA;Tags: [go web]&#xA;&#xA;Site: example.com</summary>
@@ -19,7 +19,7 @@
   </entry>
   <entry>
     <title>Second Article</title>
-    <updated>2025-06-02T00:00:00Z</updated>
+    <updated>2025-06-02T12:00:00Z</updated>
     <id>https://example.com/article2</id>
     <link href="https://example.com/article2" rel="alternate"></link>
     <summary type="html">Second test article&#xA;&#xA;Author(s): Author Two&#xA;&#xA;Tags: [testing feed]&#xA;&#xA;Site: example.com</summary>

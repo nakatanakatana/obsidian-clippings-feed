@@ -27,11 +27,6 @@ func GenerateFeed(metadata []Metadata, config FeedConfig) (*feeds.Feed, error) {
 	}
 
 	for _, meta := range metadata {
-		published, err := time.Parse("2006-01-02", meta.Published)
-		if err != nil {
-			published = meta.Created
-		}
-
 		var authorName string
 		if len(meta.Author) > 0 {
 			authorName = strings.Join(meta.Author, ", ")
@@ -42,7 +37,7 @@ func GenerateFeed(metadata []Metadata, config FeedConfig) (*feeds.Feed, error) {
 			Link:        &feeds.Link{Href: meta.Source},
 			Description: meta.Description,
 			Author:      &feeds.Author{Name: authorName},
-			Created:     published,
+			Created:     meta.Created,
 			Id:          meta.Source,
 		}
 
