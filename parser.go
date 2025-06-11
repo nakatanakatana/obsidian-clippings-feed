@@ -14,7 +14,7 @@ type Metadata struct {
 	Title       string    `json:"title"`
 	Site        string    `json:"site"`
 	Source      string    `json:"source"`
-	Author      string    `json:"author"`
+	Author      []string  `json:"author"`
 	Published   string    `json:"published"`
 	Created     time.Time `json:"created"`
 	Description string    `json:"description"`

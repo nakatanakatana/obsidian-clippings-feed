@@ -11,13 +11,13 @@ import (
 )
 
 type Config struct {
-	TargetDir       string        `env:"FEED_TARGET_DIR" envDefault:"./"`
-	Port            string        `env:"FEED_PORT" envDefault:"8080"`
-	FeedTitle       string        `env:"FEED_TITLE" envDefault:"Obsidian Clippings Feed"`
-	FeedLink        string        `env:"FEED_LINK" envDefault:"http://localhost:8080"`
-	FeedDesc        string        `env:"FEED_DESC" envDefault:"RSS feed from Obsidian clippings"`
-	FeedAuthor      string        `env:"FEED_AUTHOR" envDefault:"Obsidian User"`
-	RefreshInterval time.Duration `env:"FEED_REFRESH_INTERVAL" envDefault:"5m"`
+	TargetDir     string        `env:"FEED_TARGET_DIR" envDefault:"./"`
+	Port          string        `env:"FEED_PORT" envDefault:"8080"`
+	FeedTitle     string        `env:"FEED_TITLE" envDefault:"Obsidian Clippings Feed"`
+	FeedLink      string        `env:"FEED_LINK" envDefault:"http://localhost:8080"`
+	FeedDesc      string        `env:"FEED_DESC" envDefault:"RSS feed from Obsidian clippings"`
+	FeedAuthor    string        `env:"FEED_AUTHOR" envDefault:"Obsidian User"`
+	DebounceDelay time.Duration `env:"FEED_DEBOUNCE_DELAY" envDefault:"10s"`
 }
 
 func main() {
@@ -44,19 +44,21 @@ func main() {
 		log.Fatalf("Failed to generate initial feeds: %v", err)
 	}
 
-	go generator.StartPeriodicGeneration()
-
 	indexHTML := filepath.Join(tmpDir, "index.html")
 	if err := generator.GenerateIndexHTML(indexHTML); err != nil {
 		log.Fatalf("Failed to generate index.html: %v", err)
+	}
+
+	if err := generator.StartFileWatcher(); err != nil {
+		log.Fatalf("Failed to start file watcher: %v", err)
 	}
 
 	fs := http.FileServer(http.Dir(tmpDir))
 	http.Handle("/", fs)
 
 	log.Printf("Starting feed server on port %s", config.Port)
-	log.Printf("Scanning directory: %s", config.TargetDir)
+	log.Printf("Watching directory: %s", config.TargetDir)
 	log.Printf("Serving files from: %s", tmpDir)
-	log.Printf("Feed refresh interval: %s", config.RefreshInterval)
+	log.Printf("Debounce delay: %s", config.DebounceDelay)
 	log.Fatal(http.ListenAndServe(":"+config.Port, nil))
 }

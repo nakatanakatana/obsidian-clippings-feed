@@ -9,14 +9,17 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fsnotify/fsnotify"
 	clippingsfeed "github.com/nakatanakatana/obsidian-clippings-feed"
 	"github.com/yuin/goldmark"
 )
 
 type FeedGenerator struct {
-	config Config
-	tmpDir string
-	parser goldmark.Markdown
+	config        Config
+	tmpDir        string
+	parser        goldmark.Markdown
+	watcher       *fsnotify.Watcher
+	debounceTimer *time.Timer
 }
 
 func NewFeedGenerator(config Config, tmpDir string) *FeedGenerator {
@@ -110,7 +113,7 @@ func (g *FeedGenerator) GenerateIndexHTML(filename string) error {
     </div>
     
     <div class="last-updated">
-        Last updated: %s (refresh interval: %s)
+        Last updated: %s (update mode: %s)
     </div>
 </body>
 </html>`
@@ -122,14 +125,19 @@ func (g *FeedGenerator) GenerateIndexHTML(filename string) error {
 			tags = "No tags"
 		}
 
+		authors := strings.Join(meta.Author, ", ")
+		if authors == "" {
+			authors = "Unknown"
+		}
+
 		itemHTML := fmt.Sprintf(`
             <li class="item">
                 <div class="item-title"><a href="%s" target="_blank">%s</a></div>
-                <div class="item-meta">Author: %s | Site: %s | Published: %s</div>
+                <div class="item-meta">Author(s): %s | Site: %s | Published: %s</div>
                 <div class="item-desc">%s</div>
                 <div class="item-tags">Tags: %s</div>
             </li>`,
-			meta.Source, meta.Title, meta.Author, meta.Site, meta.Published, meta.Description, tags)
+			meta.Source, meta.Title, authors, meta.Site, meta.Published, meta.Description, tags)
 		itemsHTML += itemHTML
 	}
 
@@ -140,26 +148,114 @@ func (g *FeedGenerator) GenerateIndexHTML(filename string) error {
 		g.config.TargetDir,
 		itemsHTML,
 		time.Now().Format("2006-01-02 15:04:05"),
-		g.config.RefreshInterval,
+		"file watcher",
 	)
 
 	return os.WriteFile(filename, []byte(finalHTML), 0644)
 }
 
-func (g *FeedGenerator) StartPeriodicGeneration() {
-	ticker := time.NewTicker(g.config.RefreshInterval)
-	defer ticker.Stop()
+func (g *FeedGenerator) StartFileWatcher() error {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		return fmt.Errorf("failed to create watcher: %w", err)
+	}
+	g.watcher = watcher
 
-	for range ticker.C {
+	if err := g.addWatchesRecursively(g.config.TargetDir); err != nil {
+		return fmt.Errorf("failed to add watches: %w", err)
+	}
+
+	go g.watchLoop()
+	log.Printf("File watcher started for directory: %s", g.config.TargetDir)
+	return nil
+}
+
+func (g *FeedGenerator) addWatchesRecursively(dir string) error {
+	return filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			if err := g.watcher.Add(path); err != nil {
+				log.Printf("Warning: failed to watch directory %s: %v", path, err)
+				return nil
+			}
+			log.Printf("Watching directory: %s", path)
+		}
+		return nil
+	})
+}
+
+func (g *FeedGenerator) watchLoop() {
+	defer func() {
+		if err := g.watcher.Close(); err != nil {
+			log.Printf("Error closing file watcher: %v", err)
+		}
+	}()
+
+	for {
+		select {
+		case event, ok := <-g.watcher.Events:
+			if !ok {
+				return
+			}
+
+			if g.shouldProcessEvent(event) {
+				g.debouncedRegenerate()
+			}
+
+			if event.Op&fsnotify.Create == fsnotify.Create {
+				if stat, err := os.Stat(event.Name); err == nil && stat.IsDir() {
+					if err := g.watcher.Add(event.Name); err != nil {
+						log.Printf("Warning: failed to watch new directory %s: %v", event.Name, err)
+					} else {
+						log.Printf("Added watch for new directory: %s", event.Name)
+					}
+				}
+			}
+
+		case err, ok := <-g.watcher.Errors:
+			if !ok {
+				return
+			}
+			log.Printf("File watcher error: %v", err)
+		}
+	}
+}
+
+func (g *FeedGenerator) shouldProcessEvent(event fsnotify.Event) bool {
+	if event.Op&(fsnotify.Write|fsnotify.Create|fsnotify.Remove|fsnotify.Rename) == 0 {
+		return false
+	}
+
+	if strings.HasSuffix(strings.ToLower(event.Name), ".md") {
+		log.Printf("Detected change in markdown file: %s", event.Name)
+		return true
+	}
+
+	return false
+}
+
+func (g *FeedGenerator) debouncedRegenerate() {
+	if g.debounceTimer != nil {
+		g.debounceTimer.Stop()
+	}
+
+	g.debounceTimer = time.AfterFunc(g.config.DebounceDelay, func() {
+		log.Printf("Regenerating feeds due to file changes...")
+
 		if err := g.GenerateFeeds(); err != nil {
-			log.Printf("Error during periodic feed generation: %v", err)
+			log.Printf("Error during feed regeneration: %v", err)
 		}
 
 		indexHTML := filepath.Join(g.tmpDir, "index.html")
 		if err := g.GenerateIndexHTML(indexHTML); err != nil {
-			log.Printf("Error during periodic index generation: %v", err)
+			log.Printf("Error during index regeneration: %v", err)
 		}
-	}
+
+		log.Printf("Feed regeneration completed")
+	})
 }
 
 func (g *FeedGenerator) scanMarkdownFiles() ([]clippingsfeed.Metadata, error) {

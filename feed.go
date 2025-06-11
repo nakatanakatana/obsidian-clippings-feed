@@ -3,6 +3,7 @@ package clippingsfeed
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gorilla/feeds"
@@ -31,13 +32,22 @@ func GenerateFeed(metadata []Metadata, config FeedConfig) (*feeds.Feed, error) {
 			published = meta.Created
 		}
 
+		var authorName string
+		if len(meta.Author) > 0 {
+			authorName = strings.Join(meta.Author, ", ")
+		}
+
 		item := &feeds.Item{
 			Title:       meta.Title,
 			Link:        &feeds.Link{Href: meta.Source},
 			Description: meta.Description,
-			Author:      &feeds.Author{Name: meta.Author},
+			Author:      &feeds.Author{Name: authorName},
 			Created:     published,
 			Id:          meta.Source,
+		}
+
+		if len(meta.Author) > 0 {
+			item.Description += fmt.Sprintf("\n\nAuthor(s): %s", strings.Join(meta.Author, ", "))
 		}
 
 		if len(meta.Tags) > 0 {
