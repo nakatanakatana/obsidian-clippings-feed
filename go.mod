@@ -3,6 +3,7 @@ module github.com/nakatanakatana/obsidian-clippings-feed
 go 1.24.3
 
 require (
+	github.com/caarlos0/env/v11 v11.3.1
 	github.com/gorilla/feeds v1.2.0
 	github.com/yuin/goldmark v1.7.12
 	github.com/yuin/goldmark-meta v1.1.0

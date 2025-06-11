@@ -14,4 +14,4 @@ FROM gcr.io/distroless/static-debian12
 
 COPY --from=builder /app/output /app
 
-CMD ["/app/obsidian-sync"]
+CMD ["/app/feed"]
