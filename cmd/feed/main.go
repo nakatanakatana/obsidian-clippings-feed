@@ -17,6 +17,7 @@ type Config struct {
 	FeedLink      string        `env:"FEED_LINK" envDefault:"http://localhost:8080"`
 	FeedDesc      string        `env:"FEED_DESC" envDefault:"RSS feed from Obsidian clippings"`
 	FeedAuthor    string        `env:"FEED_AUTHOR" envDefault:"Obsidian User"`
+	MaxItems      int           `env:"FEED_MAX_ITEMS" envDefault:"50"`
 	DebounceDelay time.Duration `env:"FEED_DEBOUNCE_DELAY" envDefault:"10s"`
 }
 

@@ -42,6 +42,7 @@ func (g *FeedGenerator) GenerateFeeds() error {
 		Description: g.config.FeedDesc,
 		Author:      g.config.FeedAuthor,
 		Created:     time.Now(),
+		MaxItems:    g.config.MaxItems,
 	}
 
 	feed, err := clippingsfeed.GenerateFeed(metadata, feedConfig)

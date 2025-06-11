@@ -16,6 +16,7 @@ type FeedConfig struct {
 	Description string
 	Author      string
 	Created     time.Time
+	MaxItems    int
 }
 
 func GenerateFeed(metadata []Metadata, config FeedConfig) (*feeds.Feed, error) {
@@ -23,6 +24,11 @@ func GenerateFeed(metadata []Metadata, config FeedConfig) (*feeds.Feed, error) {
 	sort.Slice(metadata, func(i, j int) bool {
 		return metadata[i].Created.After(metadata[j].Created)
 	})
+
+	// Limit the number of items if MaxItems is specified and positive
+	if config.MaxItems > 0 && len(metadata) > config.MaxItems {
+		metadata = metadata[:config.MaxItems]
+	}
 
 	feed := &feeds.Feed{
 		Title:       config.Title,

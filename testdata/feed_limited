@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Limited Feed</title>
+  <id>https://example.com/limited-feed</id>
+  <updated>2025-06-01T12:00:00Z</updated>
+  <subtitle>Feed with item limit</subtitle>
+  <link href="https://example.com/limited-feed"></link>
+  <author>
+    <name>Limited Feed Author</name>
+  </author>
+  <entry>
+    <title>Third Article</title>
+    <updated>2025-06-03T12:00:00Z</updated>
+    <id>https://example.com/article3</id>
+    <link href="https://example.com/article3" rel="alternate"></link>
+    <summary type="html">Third test article&#xA;&#xA;Author(s): Author Three&#xA;&#xA;Tags: [limit test]&#xA;&#xA;Site: example.com</summary>
+    <author>
+      <name>Author Three</name>
+    </author>
+  </entry>
+  <entry>
+    <title>Second Article</title>
+    <updated>2025-06-02T12:00:00Z</updated>
+    <id>https://example.com/article2</id>
+    <link href="https://example.com/article2" rel="alternate"></link>
+    <summary type="html">Second test article&#xA;&#xA;Author(s): Author Two&#xA;&#xA;Tags: [testing feed]&#xA;&#xA;Site: example.com</summary>
+    <author>
+      <name>Author Two</name>
+    </author>
+  </entry>
+</feed>

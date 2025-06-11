@@ -93,6 +93,49 @@ func TestGenerateFeed(t *testing.T) {
 				Created:     baseTime,
 			},
 		},
+		"limited items": {
+			goldenFilename: "feed_limited",
+			metadata: []clippingsfeed.Metadata{
+				{
+					Title:       "First Article",
+					Site:        "example.com",
+					Source:      "https://example.com/article1",
+					Author:      []string{"Author One"},
+					Published:   "2025-06-01",
+					Created:     baseTime,
+					Description: "First test article",
+					Tags:        []string{"go", "web"},
+				},
+				{
+					Title:       "Second Article",
+					Site:        "example.com",
+					Source:      "https://example.com/article2",
+					Author:      []string{"Author Two"},
+					Published:   "2025-06-02",
+					Created:     baseTime.Add(24 * time.Hour),
+					Description: "Second test article",
+					Tags:        []string{"testing", "feed"},
+				},
+				{
+					Title:       "Third Article",
+					Site:        "example.com",
+					Source:      "https://example.com/article3",
+					Author:      []string{"Author Three"},
+					Published:   "2025-06-03",
+					Created:     baseTime.Add(48 * time.Hour),
+					Description: "Third test article",
+					Tags:        []string{"limit", "test"},
+				},
+			},
+			config: clippingsfeed.FeedConfig{
+				Title:       "Limited Feed",
+				Link:        "https://example.com/limited-feed",
+				Description: "Feed with item limit",
+				Author:      "Limited Feed Author",
+				Created:     baseTime,
+				MaxItems:    2,
+			},
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			feed, err := clippingsfeed.GenerateFeed(tt.metadata, tt.config)
