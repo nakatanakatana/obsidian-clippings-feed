@@ -3,6 +3,7 @@ package clippingsfeed
 import (
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -18,6 +19,11 @@ type FeedConfig struct {
 }
 
 func GenerateFeed(metadata []Metadata, config FeedConfig) (*feeds.Feed, error) {
+	// Sort metadata by Created field in descending order (newest first)
+	sort.Slice(metadata, func(i, j int) bool {
+		return metadata[i].Created.After(metadata[j].Created)
+	})
+
 	feed := &feeds.Feed{
 		Title:       config.Title,
 		Link:        &feeds.Link{Href: config.Link},

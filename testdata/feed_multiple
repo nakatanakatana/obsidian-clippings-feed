@@ -8,16 +8,6 @@
     <name>Multi Feed Author</name>
   </author>
   <entry>
-    <title>First Article</title>
-    <updated>2025-06-01T12:00:00Z</updated>
-    <id>https://example.com/article1</id>
-    <link href="https://example.com/article1" rel="alternate"></link>
-    <summary type="html">First test article&#xA;&#xA;Author(s): Author One&#xA;&#xA;Tags: [go web]&#xA;&#xA;Site: example.com</summary>
-    <author>
-      <name>Author One</name>
-    </author>
-  </entry>
-  <entry>
     <title>Second Article</title>
     <updated>2025-06-02T12:00:00Z</updated>
     <id>https://example.com/article2</id>
@@ -25,6 +15,16 @@
     <summary type="html">Second test article&#xA;&#xA;Author(s): Author Two&#xA;&#xA;Tags: [testing feed]&#xA;&#xA;Site: example.com</summary>
     <author>
       <name>Author Two</name>
+    </author>
+  </entry>
+  <entry>
+    <title>First Article</title>
+    <updated>2025-06-01T12:00:00Z</updated>
+    <id>https://example.com/article1</id>
+    <link href="https://example.com/article1" rel="alternate"></link>
+    <summary type="html">First test article&#xA;&#xA;Author(s): Author One&#xA;&#xA;Tags: [go web]&#xA;&#xA;Site: example.com</summary>
+    <author>
+      <name>Author One</name>
     </author>
   </entry>
 </feed>
