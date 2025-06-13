@@ -11,12 +11,13 @@ import (
 )
 
 type FeedConfig struct {
-	Title       string
-	Link        string
-	Description string
-	Author      string
-	Created     time.Time
-	MaxItems    int
+	Title           string
+	Link            string
+	Description     string
+	Author          string
+	Created         time.Time
+	MaxItems        int
+	HideDescription bool
 }
 
 func GenerateFeed(metadata []Metadata, config FeedConfig) (*feeds.Feed, error) {
@@ -44,25 +45,30 @@ func GenerateFeed(metadata []Metadata, config FeedConfig) (*feeds.Feed, error) {
 			authorName = strings.Join(meta.Author, ", ")
 		}
 
+		var description string
+		if !config.HideDescription {
+			description = meta.Description
+
+			if len(meta.Author) > 0 {
+				description += fmt.Sprintf("\n\nAuthor(s): %s", strings.Join(meta.Author, ", "))
+			}
+
+			if len(meta.Tags) > 0 {
+				description += fmt.Sprintf("\n\nTags: %v", meta.Tags)
+			}
+
+			if meta.Site != "" {
+				description += fmt.Sprintf("\n\nSite: %s", meta.Site)
+			}
+		}
+
 		item := &feeds.Item{
 			Title:       meta.Title,
 			Link:        &feeds.Link{Href: meta.Source},
-			Description: meta.Description,
+			Description: description,
 			Author:      &feeds.Author{Name: authorName},
 			Created:     meta.Created,
 			Id:          meta.Source,
-		}
-
-		if len(meta.Author) > 0 {
-			item.Description += fmt.Sprintf("\n\nAuthor(s): %s", strings.Join(meta.Author, ", "))
-		}
-
-		if len(meta.Tags) > 0 {
-			item.Description += fmt.Sprintf("\n\nTags: %v", meta.Tags)
-		}
-
-		if meta.Site != "" {
-			item.Description += fmt.Sprintf("\n\nSite: %s", meta.Site)
 		}
 
 		feed.Items = append(feed.Items, item)

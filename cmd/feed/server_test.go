@@ -21,39 +21,53 @@ func TestGenerateIndexHTML(t *testing.T) {
 			name:     "single_item",
 			testData: "success",
 			config: Config{
-				FeedTitle:      "Test Feed",
-				FeedDesc:       "Test Description",
-				FeedLink:       "http://example.com",
-				FeedAuthor:     "Test Author",
-				TargetDir:      "/test/dir",
-				MaxItems:       50,
-				DebounceDelay:  10 * time.Second,
+				FeedTitle:     "Test Feed",
+				FeedDesc:      "Test Description",
+				FeedLink:      "http://example.com",
+				FeedAuthor:    "Test Author",
+				TargetDir:     "/test/dir",
+				MaxItems:      50,
+				DebounceDelay: 10 * time.Second,
 			},
 		},
 		{
 			name:     "multiple_items",
 			testData: "feed_multiple",
 			config: Config{
-				FeedTitle:      "Multi Item Feed",
-				FeedDesc:       "Feed with multiple items",
-				FeedLink:       "http://example.com",
-				FeedAuthor:     "Test Author",
-				TargetDir:      "/test/dir",
-				MaxItems:       50,
-				DebounceDelay:  10 * time.Second,
+				FeedTitle:     "Multi Item Feed",
+				FeedDesc:      "Feed with multiple items",
+				FeedLink:      "http://example.com",
+				FeedAuthor:    "Test Author",
+				TargetDir:     "/test/dir",
+				MaxItems:      50,
+				DebounceDelay: 10 * time.Second,
 			},
 		},
 		{
 			name:     "empty_description",
 			testData: "feed_empty_desc",
 			config: Config{
-				FeedTitle:      "Empty Desc Feed",
-				FeedDesc:       "Feed with empty description items",
-				FeedLink:       "http://example.com",
-				FeedAuthor:     "Test Author",
-				TargetDir:      "/test/dir",
-				MaxItems:       50,
-				DebounceDelay:  10 * time.Second,
+				FeedTitle:     "Empty Desc Feed",
+				FeedDesc:      "Feed with empty description items",
+				FeedLink:      "http://example.com",
+				FeedAuthor:    "Test Author",
+				TargetDir:     "/test/dir",
+				MaxItems:      50,
+				DebounceDelay: 10 * time.Second,
+			},
+		},
+		{
+			name:     "hidden_description",
+			testData: "success",
+			config: Config{
+				FeedTitle:       "Hidden Desc Feed",
+				FeedDesc:        "Feed with hidden descriptions",
+				FeedLink:        "http://example.com",
+				FeedAuthor:      "Test Author",
+				TargetDir:       "/test/dir",
+				MaxItems:        50,
+				DebounceDelay:   10 * time.Second,
+				HideDescription: true,
 			},
 		},
 	}
@@ -62,7 +76,7 @@ func TestGenerateIndexHTML(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create temporary directory for test
 			tmpDir := t.TempDir()
-			
+
 			// Create generator with test config
 			generator := &FeedGenerator{
 				config: tt.config,
@@ -98,11 +112,10 @@ func TestGenerateIndexHTML(t *testing.T) {
 	}
 }
 
-
 // loadTestData loads test metadata from testdata files
 func loadTestData(t *testing.T, testDataName string) ([]clippingsfeed.Metadata, error) {
 	t.Helper()
-	
+
 	switch testDataName {
 	case "success":
 		return []clippingsfeed.Metadata{
@@ -130,7 +143,7 @@ func loadTestData(t *testing.T, testDataName string) ([]clippingsfeed.Metadata, 
 				Tags:        []string{"test", "first"},
 			},
 			{
-				Title:       "Second Article",
+Title:       "Second Article",
 				Site:        "example.org",
 				Source:      "https://example.org/second",
 				Author:      []string{"Bob Wilson"},

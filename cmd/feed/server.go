@@ -38,12 +38,13 @@ func (g *FeedGenerator) GenerateFeeds() error {
 	}
 
 	feedConfig := clippingsfeed.FeedConfig{
-		Title:       g.config.FeedTitle,
-		Link:        g.config.FeedLink,
-		Description: g.config.FeedDesc,
-		Author:      g.config.FeedAuthor,
-		Created:     time.Now(),
-		MaxItems:    g.config.MaxItems,
+		Title:           g.config.FeedTitle,
+		Link:            g.config.FeedLink,
+		Description:     g.config.FeedDesc,
+		Author:          g.config.FeedAuthor,
+		Created:         time.Now(),
+		MaxItems:        g.config.MaxItems,
+		HideDescription: g.config.HideDescription,
 	}
 
 	feed, err := clippingsfeed.GenerateFeed(metadata, feedConfig)
@@ -69,13 +70,14 @@ func (g *FeedGenerator) GenerateFeeds() error {
 
 // Template data structure for HTML rendering
 type IndexTemplateData struct {
-	FeedTitle   string
-	FeedDesc    string
-	ItemCount   int
-	TargetDir   string
-	Items       []IndexItem
-	LastUpdated string
-	UpdateMode  string
+	FeedTitle       string
+	FeedDesc        string
+	ItemCount       int
+	TargetDir       string
+	Items           []IndexItem
+	LastUpdated     string
+	UpdateMode      string
+	HideDescription bool
 }
 
 type IndexItem struct {
@@ -131,7 +133,7 @@ const indexHTMLTemplate = `<!DOCTYPE html>
             <li class="item">
                 <div class="item-title"><a href="{{.Source}}" target="_blank">{{.Title}}</a></div>
                 <div class="item-meta">Author(s): {{.Authors}} | Site: {{.Site}} | Published: {{.Published}}</div>
-                <div class="item-desc">{{.Description}}</div>
+                {{if not $.HideDescription}}<div class="item-desc">{{.Description}}</div>{{end}}
                 <div class="item-tags">Tags: {{.Tags}}</div>
             </li>
         {{end}}
@@ -185,13 +187,14 @@ func (g *FeedGenerator) generateIndexHTMLFromMetadata(filename string, metadata 
 	}
 
 	data := IndexTemplateData{
-		FeedTitle:   g.config.FeedTitle,
-		FeedDesc:    g.config.FeedDesc,
-		ItemCount:   len(metadata),
-		TargetDir:   g.config.TargetDir,
-		Items:       items,
-		LastUpdated: time.Now().Format("2006-01-02 15:04:05"),
-		UpdateMode:  "file watcher",
+		FeedTitle:       g.config.FeedTitle,
+		FeedDesc:        g.config.FeedDesc,
+		ItemCount:       len(metadata),
+		TargetDir:       g.config.TargetDir,
+		Items:           items,
+		LastUpdated:     time.Now().Format("2006-01-02 15:04:05"),
+		UpdateMode:      "file watcher",
+		HideDescription: g.config.HideDescription,
 	}
 
 	// Create output file

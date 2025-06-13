@@ -136,6 +136,29 @@ func TestGenerateFeed(t *testing.T) {
 				MaxItems:    2,
 			},
 		},
+		"hidden description": {
+			goldenFilename: "feed_hidden_desc",
+			metadata: []clippingsfeed.Metadata{
+				{
+					Title:       "Test Article",
+					Site:        "example.com",
+					Source:      "https://example.com/article1",
+					Author:      []string{"John Doe"},
+					Published:   "2025-06-01",
+					Created:     baseTime,
+					Description: "This description should be hidden",
+					Tags:        []string{"go", "testing"},
+				},
+			},
+			config: clippingsfeed.FeedConfig{
+				Title:           "Hidden Desc Feed",
+				Link:            "https://example.com/hidden-desc",
+				Description:     "Feed with hidden descriptions",
+				Author:          "Hidden Desc Author",
+				Created:         baseTime,
+				HideDescription: true,
+			},
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			feed, err := clippingsfeed.GenerateFeed(tt.metadata, tt.config)

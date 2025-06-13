@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Hidden Desc Feed</title>
+  <id>https://example.com/hidden-desc</id>
+  <updated>2025-06-01T12:00:00Z</updated>
+  <subtitle>Feed with hidden descriptions</subtitle>
+  <link href="https://example.com/hidden-desc"></link>
+  <author>
+    <name>Hidden Desc Author</name>
+  </author>
+  <entry>
+    <title>Test Article</title>
+    <updated>2025-06-01T12:00:00Z</updated>
+    <id>https://example.com/article1</id>
+    <link href="https://example.com/article1" rel="alternate"></link>
+    <author>
+      <name>John Doe</name>
+    </author>
+  </entry>
+</feed>

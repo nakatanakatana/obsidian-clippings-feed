@@ -11,14 +11,15 @@ import (
 )
 
 type Config struct {
-	TargetDir     string        `env:"FEED_TARGET_DIR" envDefault:"./"`
-	Port          string        `env:"FEED_PORT" envDefault:"8080"`
-	FeedTitle     string        `env:"FEED_TITLE" envDefault:"Obsidian Clippings Feed"`
-	FeedLink      string        `env:"FEED_LINK" envDefault:"http://localhost:8080"`
-	FeedDesc      string        `env:"FEED_DESC" envDefault:"RSS feed from Obsidian clippings"`
-	FeedAuthor    string        `env:"FEED_AUTHOR" envDefault:"Obsidian User"`
-	MaxItems      int           `env:"FEED_MAX_ITEMS" envDefault:"50"`
-	DebounceDelay time.Duration `env:"FEED_DEBOUNCE_DELAY" envDefault:"10s"`
+	TargetDir       string        `env:"FEED_TARGET_DIR" envDefault:"./"`
+	Port            string        `env:"FEED_PORT" envDefault:"8080"`
+	FeedTitle       string        `env:"FEED_TITLE" envDefault:"Obsidian Clippings Feed"`
+	FeedLink        string        `env:"FEED_LINK" envDefault:"http://localhost:8080"`
+	FeedDesc        string        `env:"FEED_DESC" envDefault:"RSS feed from Obsidian clippings"`
+	FeedAuthor      string        `env:"FEED_AUTHOR" envDefault:"Obsidian User"`
+	MaxItems        int           `env:"FEED_MAX_ITEMS" envDefault:"50"`
+	DebounceDelay   time.Duration `env:"FEED_DEBOUNCE_DELAY" envDefault:"10s"`
+	HideDescription bool          `env:"FEED_HIDE_DESCRIPTION" envDefault:"false"`
 }
 
 func main() {
