@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Obsidian Clippings Feed</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .header { margin-bottom: 30px; }
+        .feeds { margin-bottom: 30px; }
+        .feeds a { margin-right: 15px; padding: 5px 10px; background: #007cba; color: white; text-decoration: none; border-radius: 3px; }
+        .stats { margin-bottom: 30px; color: #666; }
+        .items { list-style: none; padding: 0; }
+        .item { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .item-title { font-weight: bold; margin-bottom: 5px; }
+        .item-meta { color: #666; font-size: 0.9em; margin-bottom: 10px; }
+        .item-desc { margin-bottom: 10px; }
+        .item-tags { font-size: 0.8em; color: #999; }
+        .last-updated { color: #999; font-size: 0.9em; margin-top: 30px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Empty Desc Feed</h1>
+        <p>Feed with empty description items</p>
+    </div>
+    
+    <div class="feeds">
+        <strong>Available feeds:</strong><br><br>
+        <a href="/feed.rss">RSS</a>
+        <a href="/feed.atom">Atom</a>
+        <a href="/feed.json">JSON</a>
+    </div>
+    
+    <div class="stats">
+        <strong>Statistics:</strong> 1 items found in directory: /test/dir
+    </div>
+    
+    <div class="content">
+        <h2>Recent Items</h2>
+        <ul class="items">
+        
+            <li class="item">
+                <div class="item-title"><a href="https://example.com/nodesc" target="_blank">No Description Article</a></div>
+                <div class="item-meta">Author(s): Test Author | Site: example.com | Published: 2023-01-01</div>
+                <div class="item-desc"></div>
+                <div class="item-tags">Tags: test</div>
+            </li>
+        
+        </ul>
+    </div>
+    
+    <div class="last-updated">
+        Last updated: 2023-01-01 00:00:00 (update mode: file watcher)
+    </div>
+</body>
+</html>

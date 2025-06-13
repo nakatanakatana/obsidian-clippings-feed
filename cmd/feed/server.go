@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"io/fs"
 	"log"
 	"os"
@@ -66,13 +67,28 @@ func (g *FeedGenerator) GenerateFeeds() error {
 	return nil
 }
 
-func (g *FeedGenerator) GenerateIndexHTML(filename string) error {
-	metadata, err := g.scanMarkdownFiles()
-	if err != nil {
-		return fmt.Errorf("failed to scan markdown files: %w", err)
-	}
+// Template data structure for HTML rendering
+type IndexTemplateData struct {
+	FeedTitle   string
+	FeedDesc    string
+	ItemCount   int
+	TargetDir   string
+	Items       []IndexItem
+	LastUpdated string
+	UpdateMode  string
+}
 
-	html := `<!DOCTYPE html>
+type IndexItem struct {
+	Title       string
+	Source      string
+	Authors     string
+	Site        string
+	Published   string
+	Description string
+	Tags        string
+}
+
+const indexHTMLTemplate = `<!DOCTYPE html>
 <html>
 <head>
     <title>Obsidian Clippings Feed</title>
@@ -93,8 +109,8 @@ func (g *FeedGenerator) GenerateIndexHTML(filename string) error {
 </head>
 <body>
     <div class="header">
-        <h1>%s</h1>
-        <p>%s</p>
+        <h1>{{.FeedTitle}}</h1>
+        <p>{{.FeedDesc}}</p>
     </div>
     
     <div class="feeds">
@@ -105,22 +121,48 @@ func (g *FeedGenerator) GenerateIndexHTML(filename string) error {
     </div>
     
     <div class="stats">
-        <strong>Statistics:</strong> %d items found in directory: %s
+        <strong>Statistics:</strong> {{.ItemCount}} items found in directory: {{.TargetDir}}
     </div>
     
     <div class="content">
         <h2>Recent Items</h2>
-        <ul class="items">%s</ul>
+        <ul class="items">
+        {{range .Items}}
+            <li class="item">
+                <div class="item-title"><a href="{{.Source}}" target="_blank">{{.Title}}</a></div>
+                <div class="item-meta">Author(s): {{.Authors}} | Site: {{.Site}} | Published: {{.Published}}</div>
+                <div class="item-desc">{{.Description}}</div>
+                <div class="item-tags">Tags: {{.Tags}}</div>
+            </li>
+        {{end}}
+        </ul>
     </div>
     
     <div class="last-updated">
-        Last updated: %s (update mode: %s)
+        Last updated: {{.LastUpdated}} (update mode: {{.UpdateMode}})
     </div>
 </body>
 </html>`
 
-	var itemsHTML string
-	for _, meta := range metadata {
+func (g *FeedGenerator) GenerateIndexHTML(filename string) error {
+	metadata, err := g.scanMarkdownFiles()
+	if err != nil {
+		return fmt.Errorf("failed to scan markdown files: %w", err)
+	}
+
+	return g.generateIndexHTMLFromMetadata(filename, metadata)
+}
+
+func (g *FeedGenerator) generateIndexHTMLFromMetadata(filename string, metadata []clippingsfeed.Metadata) error {
+	// Create template
+	tmpl, err := template.New("index").Parse(indexHTMLTemplate)
+	if err != nil {
+		return fmt.Errorf("failed to parse template: %w", err)
+	}
+
+	// Prepare template data
+	items := make([]IndexItem, len(metadata))
+	for i, meta := range metadata {
 		tags := strings.Join(meta.Tags, ", ")
 		if tags == "" {
 			tags = "No tags"
@@ -131,28 +173,40 @@ func (g *FeedGenerator) GenerateIndexHTML(filename string) error {
 			authors = "Unknown"
 		}
 
-		itemHTML := fmt.Sprintf(`
-            <li class="item">
-                <div class="item-title"><a href="%s" target="_blank">%s</a></div>
-                <div class="item-meta">Author(s): %s | Site: %s | Published: %s</div>
-                <div class="item-desc">%s</div>
-                <div class="item-tags">Tags: %s</div>
-            </li>`,
-			meta.Source, meta.Title, authors, meta.Site, meta.Published, meta.Description, tags)
-		itemsHTML += itemHTML
+		items[i] = IndexItem{
+			Title:       meta.Title,
+			Source:      meta.Source,
+			Authors:     authors,
+			Site:        meta.Site,
+			Published:   meta.Published,
+			Description: meta.Description,
+			Tags:        tags,
+		}
 	}
 
-	finalHTML := fmt.Sprintf(html,
-		g.config.FeedTitle,
-		g.config.FeedDesc,
-		len(metadata),
-		g.config.TargetDir,
-		itemsHTML,
-		time.Now().Format("2006-01-02 15:04:05"),
-		"file watcher",
-	)
+	data := IndexTemplateData{
+		FeedTitle:   g.config.FeedTitle,
+		FeedDesc:    g.config.FeedDesc,
+		ItemCount:   len(metadata),
+		TargetDir:   g.config.TargetDir,
+		Items:       items,
+		LastUpdated: time.Now().Format("2006-01-02 15:04:05"),
+		UpdateMode:  "file watcher",
+	}
 
-	return os.WriteFile(filename, []byte(finalHTML), 0644)
+	// Create output file
+	file, err := os.Create(filename)
+	if err != nil {
+		return fmt.Errorf("failed to create file: %w", err)
+	}
+	defer file.Close() //nolint:errcheck
+
+	// Execute template
+	if err := tmpl.Execute(file, data); err != nil {
+		return fmt.Errorf("failed to execute template: %w", err)
+	}
+
+	return nil
 }
 
 func (g *FeedGenerator) StartFileWatcher() error {
