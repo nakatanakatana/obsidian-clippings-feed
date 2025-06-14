@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/fs"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -64,7 +64,7 @@ func (g *FeedGenerator) GenerateFeeds() error {
 		return fmt.Errorf("failed to write JSON feed: %w", err)
 	}
 
-	log.Printf("Generated feeds with %d items", len(metadata))
+	slog.Info("Generated feeds", "itemCount", len(metadata))
 	return nil
 }
 
@@ -224,7 +224,7 @@ func (g *FeedGenerator) StartFileWatcher() error {
 	}
 
 	go g.watchLoop()
-	log.Printf("File watcher started for directory: %s", g.config.TargetDir)
+	slog.Info("File watcher started", "directory", g.config.TargetDir)
 	return nil
 }
 
@@ -236,10 +236,10 @@ func (g *FeedGenerator) addWatchesRecursively(dir string) error {
 
 		if d.IsDir() {
 			if err := g.watcher.Add(path); err != nil {
-				log.Printf("Warning: failed to watch directory %s: %v", path, err)
+				slog.Warn("Failed to watch directory", "directory", path, "error", err)
 				return nil
 			}
-			log.Printf("Watching directory: %s", path)
+			slog.Debug("Watching directory", "directory", path)
 		}
 		return nil
 	})
@@ -248,7 +248,7 @@ func (g *FeedGenerator) addWatchesRecursively(dir string) error {
 func (g *FeedGenerator) watchLoop() {
 	defer func() {
 		if err := g.watcher.Close(); err != nil {
-			log.Printf("Error closing file watcher: %v", err)
+			slog.Error("Error closing file watcher", "error", err)
 		}
 	}()
 
@@ -266,9 +266,9 @@ func (g *FeedGenerator) watchLoop() {
 			if event.Op&fsnotify.Create == fsnotify.Create {
 				if stat, err := os.Stat(event.Name); err == nil && stat.IsDir() {
 					if err := g.watcher.Add(event.Name); err != nil {
-						log.Printf("Warning: failed to watch new directory %s: %v", event.Name, err)
+						slog.Warn("Failed to watch new directory", "directory", event.Name, "error", err)
 					} else {
-						log.Printf("Added watch for new directory: %s", event.Name)
+						slog.Info("Added watch for new directory", "directory", event.Name)
 					}
 				}
 			}
@@ -277,7 +277,7 @@ func (g *FeedGenerator) watchLoop() {
 			if !ok {
 				return
 			}
-			log.Printf("File watcher error: %v", err)
+			slog.Error("File watcher error", "error", err)
 		}
 	}
 }
@@ -288,7 +288,7 @@ func (g *FeedGenerator) shouldProcessEvent(event fsnotify.Event) bool {
 	}
 
 	if strings.HasSuffix(strings.ToLower(event.Name), ".md") {
-		log.Printf("Detected change in markdown file: %s", event.Name)
+		slog.Info("Detected change in markdown file", "file", event.Name, "operation", event.Op.String())
 		return true
 	}
 
@@ -301,18 +301,18 @@ func (g *FeedGenerator) debouncedRegenerate() {
 	}
 
 	g.debounceTimer = time.AfterFunc(g.config.DebounceDelay, func() {
-		log.Printf("Regenerating feeds due to file changes...")
+		slog.Info("Regenerating feeds due to file changes")
 
 		if err := g.GenerateFeeds(); err != nil {
-			log.Printf("Error during feed regeneration: %v", err)
+			slog.Error("Error during feed regeneration", "error", err)
 		}
 
 		indexHTML := filepath.Join(g.tmpDir, "index.html")
 		if err := g.GenerateIndexHTML(indexHTML); err != nil {
-			log.Printf("Error during index regeneration: %v", err)
+			slog.Error("Error during index regeneration", "error", err, "file", indexHTML)
 		}
 
-		log.Printf("Feed regeneration completed")
+		slog.Info("Feed regeneration completed")
 	})
 }
 
@@ -330,13 +330,13 @@ func (g *FeedGenerator) scanMarkdownFiles() ([]clippingsfeed.Metadata, error) {
 
 		content, err := os.ReadFile(path)
 		if err != nil {
-			log.Printf("Error reading file %s: %v", path, err)
+			slog.Warn("Error reading file", "file", path, "error", err)
 			return nil
 		}
 
 		meta, err := clippingsfeed.ParseMeta(g.parser, string(content))
 		if err != nil {
-			log.Printf("Error parsing metadata from %s: %v", path, err)
+			slog.Warn("Error parsing metadata", "file", path, "error", err)
 			return nil
 		}
 

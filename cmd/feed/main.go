@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -23,44 +23,65 @@ type Config struct {
 }
 
 func main() {
+	// Configure structured logging
+	logLevel := slog.LevelInfo
+	if os.Getenv("LOG_LEVEL") == "debug" {
+		logLevel = slog.LevelDebug
+	}
+	
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: logLevel,
+	})))
+
 	var config Config
 	if err := env.Parse(&config); err != nil {
-		log.Fatalf("Failed to parse config: %v", err)
+		slog.Error("Failed to parse config", "error", err)
+		os.Exit(1)
 	}
 
 	tmpDir, err := os.MkdirTemp("", "obsidian-feed-*")
 	if err != nil {
-		log.Fatalf("Failed to create temp directory: %v", err)
+		slog.Error("Failed to create temp directory", "error", err)
+		os.Exit(1)
 	}
 	defer func() {
 		if err := os.RemoveAll(tmpDir); err != nil {
-			log.Printf("Failed to remove temp directory: %v", err)
+			slog.Warn("Failed to remove temp directory", "error", err, "tmpDir", tmpDir)
 		}
 	}()
 
-	log.Printf("Created temp directory: %s", tmpDir)
+	slog.Info("Created temp directory", "tmpDir", tmpDir)
 
 	generator := NewFeedGenerator(config, tmpDir)
 
 	if err := generator.GenerateFeeds(); err != nil {
-		log.Fatalf("Failed to generate initial feeds: %v", err)
+		slog.Error("Failed to generate initial feeds", "error", err)
+		os.Exit(1)
 	}
 
 	indexHTML := filepath.Join(tmpDir, "index.html")
 	if err := generator.GenerateIndexHTML(indexHTML); err != nil {
-		log.Fatalf("Failed to generate index.html: %v", err)
+		slog.Error("Failed to generate index.html", "error", err, "file", indexHTML)
+		os.Exit(1)
 	}
 
 	if err := generator.StartFileWatcher(); err != nil {
-		log.Fatalf("Failed to start file watcher: %v", err)
+		slog.Error("Failed to start file watcher", "error", err)
+		os.Exit(1)
 	}
 
 	fs := http.FileServer(http.Dir(tmpDir))
 	http.Handle("/", fs)
 
-	log.Printf("Starting feed server on port %s", config.Port)
-	log.Printf("Watching directory: %s", config.TargetDir)
-	log.Printf("Serving files from: %s", tmpDir)
-	log.Printf("Debounce delay: %s", config.DebounceDelay)
-	log.Fatal(http.ListenAndServe(":"+config.Port, nil))
+	slog.Info("Starting feed server",
+		"port", config.Port,
+		"watchDir", config.TargetDir,
+		"serveDir", tmpDir,
+		"debounceDelay", config.DebounceDelay,
+		"hideDescription", config.HideDescription)
+
+	if err := http.ListenAndServe(":"+config.Port, nil); err != nil {
+		slog.Error("Failed to start HTTP server", "error", err, "port", config.Port)
+		os.Exit(1)
+	}
 }

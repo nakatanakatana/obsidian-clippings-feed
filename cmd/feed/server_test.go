@@ -143,7 +143,7 @@ func loadTestData(t *testing.T, testDataName string) ([]clippingsfeed.Metadata, 
 				Tags:        []string{"test", "first"},
 			},
 			{
-Title:       "Second Article",
+				Title:       "Second Article",
 				Site:        "example.org",
 				Source:      "https://example.org/second",
 				Author:      []string{"Bob Wilson"},
