@@ -159,6 +159,48 @@ func TestGenerateFeed(t *testing.T) {
 				HideDescription: true,
 			},
 		},
+		"filtered items": {
+			goldenFilename: "feed_filtered",
+			metadata: []clippingsfeed.Metadata{
+				{
+					Title:       "Valid Article",
+					Site:        "example.com",
+					Source:      "https://example.com/valid",
+					Author:      []string{"Valid Author"},
+					Published:   "2025-06-01",
+					Created:     baseTime,
+					Description: "This article has both title and source",
+					Tags:        []string{"valid"},
+				},
+				{
+					Title:       "", // Empty title - should be filtered
+					Site:        "example.com",
+					Source:      "https://example.com/no-title",
+					Author:      []string{"No Title Author"},
+					Published:   "2025-06-02",
+					Created:     baseTime.Add(24 * time.Hour),
+					Description: "This article has no title",
+					Tags:        []string{"invalid"},
+				},
+				{
+					Title:       "No Source Article",
+					Site:        "example.com",
+					Source:      "", // Empty source - should be filtered
+					Author:      []string{"No Source Author"},
+					Published:   "2025-06-03",
+					Created:     baseTime.Add(48 * time.Hour),
+					Description: "This article has no source",
+					Tags:        []string{"invalid"},
+				},
+			},
+			config: clippingsfeed.FeedConfig{
+				Title:       "Filtered Feed",
+				Link:        "https://example.com/filtered",
+				Description: "Feed with filtered items",
+				Author:      "Filtered Author",
+				Created:     baseTime,
+			},
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			feed, err := clippingsfeed.GenerateFeed(tt.metadata, tt.config)

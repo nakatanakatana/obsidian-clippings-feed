@@ -40,6 +40,11 @@ func GenerateFeed(metadata []Metadata, config FeedConfig) (*feeds.Feed, error) {
 	}
 
 	for _, meta := range metadata {
+		// Skip items without required Source or Title
+		if meta.Source == "" || meta.Title == "" {
+			continue
+		}
+
 		var authorName string
 		if len(meta.Author) > 0 {
 			authorName = strings.Join(meta.Author, ", ")

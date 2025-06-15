@@ -28,7 +28,7 @@ func main() {
 	if os.Getenv("LOG_LEVEL") == "debug" {
 		logLevel = slog.LevelDebug
 	}
-	
+
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		Level: logLevel,
 	})))

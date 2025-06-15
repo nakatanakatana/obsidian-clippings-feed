@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Filtered Feed</title>
+  <id>https://example.com/filtered</id>
+  <updated>2025-06-01T12:00:00Z</updated>
+  <subtitle>Feed with filtered items</subtitle>
+  <link href="https://example.com/filtered"></link>
+  <author>
+    <name>Filtered Author</name>
+  </author>
+  <entry>
+    <title>Valid Article</title>
+    <updated>2025-06-01T12:00:00Z</updated>
+    <id>https://example.com/valid</id>
+    <link href="https://example.com/valid" rel="alternate"></link>
+    <summary type="html">This article has both title and source&#xA;&#xA;Author(s): Valid Author&#xA;&#xA;Tags: [valid]&#xA;&#xA;Site: example.com</summary>
+    <author>
+      <name>Valid Author</name>
+    </author>
+  </entry>
+</feed>
