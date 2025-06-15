@@ -19,7 +19,7 @@ type Config struct {
 	FeedAuthor      string        `env:"FEED_AUTHOR" envDefault:"Obsidian User"`
 	MaxItems        int           `env:"FEED_MAX_ITEMS" envDefault:"50"`
 	DebounceDelay   time.Duration `env:"FEED_DEBOUNCE_DELAY" envDefault:"10s"`
-	HideDescription bool          `env:"FEED_HIDE_DESCRIPTION" envDefault:"false"`
+	HideDescription bool          `env:"FEED_HIDE_DESCRIPTION" envDefault:"true"`
 }
 
 func main() {
