@@ -156,6 +156,11 @@ func (g *FeedGenerator) GenerateIndexHTML(filename string) error {
 }
 
 func (g *FeedGenerator) generateIndexHTMLFromMetadata(filename string, metadata []clippingsfeed.Metadata) error {
+	// Process metadata: filter, sort, and limit (same as feed generation)
+	filteredMetadata := clippingsfeed.FilterValidMetadata(metadata)
+	clippingsfeed.SortMetadataByCreated(filteredMetadata)
+	processedMetadata := clippingsfeed.LimitMetadataItems(filteredMetadata, g.config.MaxItems)
+
 	// Create template
 	tmpl, err := template.New("index").Parse(indexHTMLTemplate)
 	if err != nil {
@@ -163,8 +168,8 @@ func (g *FeedGenerator) generateIndexHTMLFromMetadata(filename string, metadata 
 	}
 
 	// Prepare template data
-	items := make([]IndexItem, len(metadata))
-	for i, meta := range metadata {
+	items := make([]IndexItem, len(processedMetadata))
+	for i, meta := range processedMetadata {
 		tags := strings.Join(meta.Tags, ", ")
 		if tags == "" {
 			tags = "No tags"
@@ -189,7 +194,7 @@ func (g *FeedGenerator) generateIndexHTMLFromMetadata(filename string, metadata 
 	data := IndexTemplateData{
 		FeedTitle:       g.config.FeedTitle,
 		FeedDesc:        g.config.FeedDesc,
-		ItemCount:       len(metadata),
+		ItemCount:       len(processedMetadata),
 		TargetDir:       g.config.TargetDir,
 		Items:           items,
 		LastUpdated:     time.Now().Format("2006-01-02 15:04:05"),

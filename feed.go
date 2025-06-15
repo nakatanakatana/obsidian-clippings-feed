@@ -20,16 +20,37 @@ type FeedConfig struct {
 	HideDescription bool
 }
 
-func GenerateFeed(metadata []Metadata, config FeedConfig) (*feeds.Feed, error) {
-	// Sort metadata by Created field in descending order (newest first)
+// FilterValidMetadata removes metadata items without required Source or Title fields
+func FilterValidMetadata(metadata []Metadata) []Metadata {
+	var filtered []Metadata
+	for _, meta := range metadata {
+		if meta.Source != "" && meta.Title != "" {
+			filtered = append(filtered, meta)
+		}
+	}
+	return filtered
+}
+
+// SortMetadataByCreated sorts metadata by Created field in descending order (newest first)
+func SortMetadataByCreated(metadata []Metadata) {
 	sort.Slice(metadata, func(i, j int) bool {
 		return metadata[i].Created.After(metadata[j].Created)
 	})
+}
 
-	// Limit the number of items if MaxItems is specified and positive
-	if config.MaxItems > 0 && len(metadata) > config.MaxItems {
-		metadata = metadata[:config.MaxItems]
+// LimitMetadataItems limits the number of items if maxItems is specified and positive
+func LimitMetadataItems(metadata []Metadata, maxItems int) []Metadata {
+	if maxItems > 0 && len(metadata) > maxItems {
+		return metadata[:maxItems]
 	}
+	return metadata
+}
+
+func GenerateFeed(metadata []Metadata, config FeedConfig) (*feeds.Feed, error) {
+	// Process metadata: filter, sort, and limit
+	filteredMetadata := FilterValidMetadata(metadata)
+	SortMetadataByCreated(filteredMetadata)
+	processedMetadata := LimitMetadataItems(filteredMetadata, config.MaxItems)
 
 	feed := &feeds.Feed{
 		Title:       config.Title,
@@ -39,11 +60,7 @@ func GenerateFeed(metadata []Metadata, config FeedConfig) (*feeds.Feed, error) {
 		Created:     config.Created,
 	}
 
-	for _, meta := range metadata {
-		// Skip items without required Source or Title
-		if meta.Source == "" || meta.Title == "" {
-			continue
-		}
+	for _, meta := range processedMetadata {
 
 		var authorName string
 		if len(meta.Author) > 0 {

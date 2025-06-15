@@ -213,3 +213,89 @@ func TestGenerateFeed(t *testing.T) {
 		})
 	}
 }
+
+func TestFilterValidMetadata(t *testing.T) {
+	baseTime := time.Date(2025, 6, 1, 12, 0, 0, 0, time.UTC)
+
+	input := []clippingsfeed.Metadata{
+		{
+			Title:   "Valid Article",
+			Source:  "https://example.com/valid",
+			Created: baseTime,
+		},
+		{
+			Title:   "", // Empty title - should be filtered
+			Source:  "https://example.com/no-title",
+			Created: baseTime,
+		},
+		{
+			Title:   "No Source Article",
+			Source:  "", // Empty source - should be filtered
+			Created: baseTime,
+		},
+		{
+			Title:   "Another Valid Article",
+			Source:  "https://example.com/valid2",
+			Created: baseTime,
+		},
+	}
+
+	result := clippingsfeed.FilterValidMetadata(input)
+
+	assert.Equal(t, 2, len(result))
+	assert.Equal(t, "Valid Article", result[0].Title)
+	assert.Equal(t, "Another Valid Article", result[1].Title)
+}
+
+func TestSortMetadataByCreated(t *testing.T) {
+	baseTime := time.Date(2025, 6, 1, 12, 0, 0, 0, time.UTC)
+
+	metadata := []clippingsfeed.Metadata{
+		{
+			Title:   "Oldest",
+			Source:  "https://example.com/1",
+			Created: baseTime,
+		},
+		{
+			Title:   "Newest",
+			Source:  "https://example.com/3",
+			Created: baseTime.Add(48 * time.Hour),
+		},
+		{
+			Title:   "Middle",
+			Source:  "https://example.com/2",
+			Created: baseTime.Add(24 * time.Hour),
+		},
+	}
+
+	clippingsfeed.SortMetadataByCreated(metadata)
+
+	assert.Equal(t, "Newest", metadata[0].Title)
+	assert.Equal(t, "Middle", metadata[1].Title)
+	assert.Equal(t, "Oldest", metadata[2].Title)
+}
+
+func TestLimitMetadataItems(t *testing.T) {
+	baseTime := time.Date(2025, 6, 1, 12, 0, 0, 0, time.UTC)
+
+	metadata := []clippingsfeed.Metadata{
+		{Title: "Item 1", Source: "https://example.com/1", Created: baseTime},
+		{Title: "Item 2", Source: "https://example.com/2", Created: baseTime},
+		{Title: "Item 3", Source: "https://example.com/3", Created: baseTime},
+		{Title: "Item 4", Source: "https://example.com/4", Created: baseTime},
+	}
+
+	// Test with limit
+	result := clippingsfeed.LimitMetadataItems(metadata, 2)
+	assert.Equal(t, 2, len(result))
+	assert.Equal(t, "Item 1", result[0].Title)
+	assert.Equal(t, "Item 2", result[1].Title)
+
+	// Test without limit (0)
+	result = clippingsfeed.LimitMetadataItems(metadata, 0)
+	assert.Equal(t, 4, len(result))
+
+	// Test with limit larger than input
+	result = clippingsfeed.LimitMetadataItems(metadata, 10)
+	assert.Equal(t, 4, len(result))
+}

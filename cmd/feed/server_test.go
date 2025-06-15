@@ -70,6 +70,19 @@ func TestGenerateIndexHTML(t *testing.T) {
 				HideDescription: true,
 			},
 		},
+		{
+			name:     "filtered_items",
+			testData: "filtered_metadata",
+			config: Config{
+				FeedTitle:     "Filtered Feed",
+				FeedDesc:      "Feed with filtered items",
+				FeedLink:      "http://example.com",
+				FeedAuthor:    "Test Author",
+				TargetDir:     "/test/dir",
+				MaxItems:      50,
+				DebounceDelay: 10 * time.Second,
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -164,6 +177,39 @@ func loadTestData(t *testing.T, testDataName string) ([]clippingsfeed.Metadata, 
 				Created:     time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
 				Description: "",
 				Tags:        []string{"test"},
+			},
+		}, nil
+	case "filtered_metadata":
+		return []clippingsfeed.Metadata{
+			{
+				Title:       "Valid Article",
+				Site:        "example.com",
+				Source:      "https://example.com/valid",
+				Author:      []string{"Valid Author"},
+				Published:   "2023-01-01",
+				Created:     time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
+				Description: "This article has both title and source",
+				Tags:        []string{"valid"},
+			},
+			{
+				Title:       "", // Empty title - should be filtered
+				Site:        "example.com",
+				Source:      "https://example.com/no-title",
+				Author:      []string{"No Title Author"},
+				Published:   "2023-01-02",
+				Created:     time.Date(2023, 1, 2, 12, 0, 0, 0, time.UTC),
+				Description: "This article has no title",
+				Tags:        []string{"invalid"},
+			},
+			{
+				Title:       "No Source Article",
+				Site:        "example.com",
+				Source:      "", // Empty source - should be filtered
+				Author:      []string{"No Source Author"},
+				Published:   "2023-01-03",
+				Created:     time.Date(2023, 1, 3, 12, 0, 0, 0, time.UTC),
+				Description: "This article has no source",
+				Tags:        []string{"invalid"},
 			},
 		}, nil
 	default:
