@@ -3,6 +3,7 @@ package clippingsfeed
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -99,7 +100,21 @@ func GenerateFeed(metadata []Metadata, config FeedConfig) (*feeds.Feed, error) {
 	return feed, nil
 }
 
-func WriteFeedToFile(feed *feeds.Feed, filename string, format string) error {
+func WriteFeedToFile(feed *feeds.Feed, filename string) error {
+	// Determine format from file extension
+	ext := strings.ToLower(filepath.Ext(filename))
+	var format string
+	switch ext {
+	case ".rss":
+		format = "rss"
+	case ".atom":
+		format = "atom"
+	case ".json":
+		format = "json"
+	default:
+		return fmt.Errorf("unsupported file extension: %s (supported: .rss, .atom, .json)", ext)
+	}
+
 	file, err := os.Create(filename)
 	if err != nil {
 		return fmt.Errorf("failed to create file %s: %w", filename, err)
@@ -120,8 +135,6 @@ func WriteFeedToFile(feed *feeds.Feed, filename string, format string) error {
 		err = feed.WriteAtom(file)
 	case "json":
 		err = feed.WriteJSON(file)
-	default:
-		return fmt.Errorf("unsupported format: %s", format)
 	}
 
 	if err != nil {

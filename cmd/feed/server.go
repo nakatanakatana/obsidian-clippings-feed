@@ -52,16 +52,10 @@ func (g *FeedGenerator) GenerateFeeds() error {
 		return fmt.Errorf("failed to generate feed: %w", err)
 	}
 
-	if err := clippingsfeed.WriteFeedToFile(feed, filepath.Join(g.tmpDir, "feed.rss"), "rss"); err != nil {
-		return fmt.Errorf("failed to write RSS feed: %w", err)
-	}
-
-	if err := clippingsfeed.WriteFeedToFile(feed, filepath.Join(g.tmpDir, "feed.atom"), "atom"); err != nil {
-		return fmt.Errorf("failed to write Atom feed: %w", err)
-	}
-
-	if err := clippingsfeed.WriteFeedToFile(feed, filepath.Join(g.tmpDir, "feed.json"), "json"); err != nil {
-		return fmt.Errorf("failed to write JSON feed: %w", err)
+	for _, filename := range []string{"feed.rss", "feed.atom", "feed.json"} {
+		if err := clippingsfeed.WriteFeedToFile(feed, filepath.Join(g.tmpDir, filename)); err != nil {
+			slog.Error("failed to write feed"+filename, "error", err)
+		}
 	}
 
 	slog.Info("Generated feeds", "itemCount", len(metadata))

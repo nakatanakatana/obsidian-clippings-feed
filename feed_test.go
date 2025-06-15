@@ -1,6 +1,9 @@
 package clippingsfeed_test
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -298,4 +301,89 @@ func TestLimitMetadataItems(t *testing.T) {
 	// Test with limit larger than input
 	result = clippingsfeed.LimitMetadataItems(metadata, 10)
 	assert.Equal(t, 4, len(result))
+}
+
+func TestWriteFeedToFile(t *testing.T) {
+	baseTime := time.Date(2025, 6, 1, 12, 0, 0, 0, time.UTC)
+
+	feed, err := clippingsfeed.GenerateFeed([]clippingsfeed.Metadata{
+		{
+			Title:       "Test Article",
+			Site:        "example.com",
+			Source:      "https://example.com/test",
+			Author:      []string{"Test Author"},
+			Published:   "2025-06-01",
+			Created:     baseTime,
+			Description: "Test description",
+			Tags:        []string{"test"},
+		},
+	}, clippingsfeed.FeedConfig{
+		Title:       "Test Feed",
+		Link:        "https://example.com/feed",
+		Description: "Test Description",
+		Author:      "Test Author",
+		Created:     baseTime,
+	})
+	assert.NilError(t, err)
+
+	tests := []struct {
+		name     string
+		filename string
+		contains string
+	}{
+		{
+			name:     "RSS format",
+			filename: "test.rss",
+			contains: "<?xml version=\"1.0\" encoding=\"UTF-8\"?><rss",
+		},
+		{
+			name:     "Atom format",
+			filename: "test.atom",
+			contains: "<?xml version=\"1.0\" encoding=\"UTF-8\"?><feed",
+		},
+		{
+			name:     "JSON format",
+			filename: "test.json",
+			contains: `"version":`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+			tmpFile := filepath.Join(tmpDir, tt.filename)
+
+			err := clippingsfeed.WriteFeedToFile(feed, tmpFile)
+			assert.NilError(t, err)
+
+			// Verify file exists and contains expected content
+			content, err := os.ReadFile(tmpFile)
+			assert.NilError(t, err)
+			assert.Assert(t, strings.Contains(string(content), tt.contains))
+			assert.Assert(t, strings.Contains(string(content), "Test Feed"))
+		})
+	}
+}
+
+func TestWriteFeedToFileUnsupportedExtension(t *testing.T) {
+	baseTime := time.Date(2025, 6, 1, 12, 0, 0, 0, time.UTC)
+
+	feed, err := clippingsfeed.GenerateFeed([]clippingsfeed.Metadata{
+		{
+			Title:   "Test Article",
+			Source:  "https://example.com/test",
+			Created: baseTime,
+		},
+	}, clippingsfeed.FeedConfig{
+		Title:   "Test Feed",
+		Link:    "https://example.com/feed",
+		Created: baseTime,
+	})
+	assert.NilError(t, err)
+
+	tmpDir := t.TempDir()
+	tmpFile := filepath.Join(tmpDir, "test.xml")
+
+	err = clippingsfeed.WriteFeedToFile(feed, tmpFile)
+	assert.ErrorContains(t, err, "unsupported file extension: .xml")
 }
