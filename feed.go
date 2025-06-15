@@ -100,27 +100,32 @@ func GenerateFeed(metadata []Metadata, config FeedConfig) (*feeds.Feed, error) {
 }
 
 func WriteFeedToFile(feed *feeds.Feed, filename string, format string) error {
-	var feedContent string
-	var err error
+	file, err := os.Create(filename)
+	if err != nil {
+		return fmt.Errorf("failed to create file %s: %w", filename, err)
+	}
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil {
+			// If there was already an error, keep it; otherwise use close error
+			if err == nil {
+				err = fmt.Errorf("failed to close file %s: %w", filename, closeErr)
+			}
+		}
+	}()
 
 	switch format {
 	case "rss":
-		feedContent, err = feed.ToRss()
+		err = feed.WriteRss(file)
 	case "atom":
-		feedContent, err = feed.ToAtom()
+		err = feed.WriteAtom(file)
 	case "json":
-		feedContent, err = feed.ToJSON()
+		err = feed.WriteJSON(file)
 	default:
 		return fmt.Errorf("unsupported format: %s", format)
 	}
 
 	if err != nil {
-		return fmt.Errorf("failed to generate feed: %w", err)
-	}
-
-	err = os.WriteFile(filename, []byte(feedContent), 0644)
-	if err != nil {
-		return fmt.Errorf("failed to write file: %w", err)
+		return fmt.Errorf("failed to write %s feed to %s: %w", format, filename, err)
 	}
 
 	return nil
