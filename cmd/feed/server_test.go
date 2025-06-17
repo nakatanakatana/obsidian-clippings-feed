@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
@@ -215,6 +217,178 @@ func loadTestData(t *testing.T, testDataName string) ([]clippingsfeed.Metadata, 
 	default:
 		return nil, nil
 	}
+}
+
+func TestGenerateFeeds(t *testing.T) {
+	tests := []struct {
+		name        string
+		testData    string
+		config      Config
+		expectError bool
+	}{
+		{
+			name:     "single_item",
+			testData: "success",
+			config: Config{
+				FeedTitle:     "Test Feed",
+				FeedDesc:      "Test Description",
+				FeedLink:      "http://example.com",
+				FeedAuthor:    "Test Author",
+				TargetDir:     "/test/dir",
+				MaxItems:      50,
+				DebounceDelay: 10 * time.Second,
+			},
+		},
+		{
+			name:     "multiple_items",
+			testData: "feed_multiple",
+			config: Config{
+				FeedTitle:     "Multi Item Feed",
+				FeedDesc:      "Feed with multiple items",
+				FeedLink:      "http://example.com",
+				FeedAuthor:    "Test Author",
+				TargetDir:     "/test/dir",
+				MaxItems:      50,
+				DebounceDelay: 10 * time.Second,
+			},
+		},
+		{
+			name:     "hidden_description",
+			testData: "success",
+			config: Config{
+				FeedTitle:       "Hidden Desc Feed",
+				FeedDesc:        "Feed with hidden descriptions",
+				FeedLink:        "http://example.com",
+				FeedAuthor:      "Test Author",
+				TargetDir:       "/test/dir",
+				MaxItems:        50,
+				DebounceDelay:   10 * time.Second,
+				HideDescription: true,
+			},
+		},
+		{
+			name:     "limited_items",
+			testData: "feed_multiple",
+			config: Config{
+				FeedTitle:     "Limited Feed",
+				FeedDesc:      "Feed with item limit",
+				FeedLink:      "http://example.com",
+				FeedAuthor:    "Test Author",
+				TargetDir:     "/test/dir",
+				MaxItems:      1,
+				DebounceDelay: 10 * time.Second,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Create temporary directory for test
+			tmpDir := t.TempDir()
+
+			// Create generator with test config
+			generator := &FeedGenerator{
+				config: tt.config,
+				tmpDir: tmpDir,
+				parser: clippingsfeed.CreateParser(),
+			}
+
+			// Create a temporary markdown file for scanning
+			testMarkdownDir := filepath.Join(tmpDir, "markdown")
+			err := os.MkdirAll(testMarkdownDir, 0755)
+			if err != nil {
+				t.Fatalf("Failed to create test markdown directory: %v", err)
+			}
+
+			// Load test data and create markdown files
+			metadata, err := loadTestData(t, tt.testData)
+			if err != nil {
+				t.Fatalf("Failed to load test data: %v", err)
+			}
+
+			// Create markdown files with YAML frontmatter
+			for i, meta := range metadata {
+				content := createMarkdownContent(meta)
+				filename := filepath.Join(testMarkdownDir, fmt.Sprintf("test%d.md", i))
+				err := os.WriteFile(filename, []byte(content), 0644)
+				if err != nil {
+					t.Fatalf("Failed to write test markdown file: %v", err)
+				}
+			}
+
+			// Update generator's target directory to scan the test files
+			generator.config.TargetDir = testMarkdownDir
+
+			// Call GenerateFeeds
+			err = generator.GenerateFeeds()
+			if tt.expectError {
+				if err == nil {
+					t.Errorf("Expected error but got none")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("GenerateFeeds failed: %v", err)
+			}
+
+			// Verify feed files were created
+			feedFiles := []string{"feed.rss", "feed.atom", "feed.json"}
+			for _, filename := range feedFiles {
+				feedPath := filepath.Join(tmpDir, filename)
+				if _, err := os.Stat(feedPath); os.IsNotExist(err) {
+					t.Errorf("Feed file %s was not created", filename)
+				}
+
+				// Verify file has content
+				content, err := os.ReadFile(feedPath)
+				if err != nil {
+					t.Errorf("Failed to read feed file %s: %v", filename, err)
+				}
+				if len(content) == 0 {
+					t.Errorf("Feed file %s is empty", filename)
+				}
+
+				// Basic content validation
+				contentStr := string(content)
+				if !strings.Contains(contentStr, tt.config.FeedTitle) {
+					t.Errorf("Feed file %s does not contain expected title", filename)
+				}
+			}
+		})
+	}
+}
+
+// createMarkdownContent creates markdown content with YAML frontmatter from metadata
+func createMarkdownContent(meta clippingsfeed.Metadata) string {
+	var content strings.Builder
+	content.WriteString("---\n")
+	content.WriteString(fmt.Sprintf("title: \"%s\"\n", meta.Title))
+	content.WriteString(fmt.Sprintf("site: \"%s\"\n", meta.Site))
+	content.WriteString(fmt.Sprintf("source: \"%s\"\n", meta.Source))
+
+	if len(meta.Author) > 0 {
+		content.WriteString("author:\n")
+		for _, author := range meta.Author {
+			content.WriteString(fmt.Sprintf("  - \"%s\"\n", author))
+		}
+	}
+
+	content.WriteString(fmt.Sprintf("published: \"%s\"\n", meta.Published))
+	content.WriteString(fmt.Sprintf("created: %s\n", meta.Created.Format(time.RFC3339)))
+	content.WriteString(fmt.Sprintf("description: \"%s\"\n", meta.Description))
+
+	if len(meta.Tags) > 0 {
+		content.WriteString("tags:\n")
+		for _, tag := range meta.Tags {
+			content.WriteString(fmt.Sprintf("  - \"%s\"\n", tag))
+		}
+	}
+
+	content.WriteString("---\n\n")
+	content.WriteString("# " + meta.Title + "\n\n")
+	content.WriteString(meta.Description + "\n")
+
+	return content.String()
 }
 
 // normalizeTimestamp replaces the timestamp in HTML with a fixed value for testing
