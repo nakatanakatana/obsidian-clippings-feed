@@ -6,7 +6,7 @@ require (
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gorilla/feeds v1.2.0
-	github.com/yuin/goldmark v1.7.15
+	github.com/yuin/goldmark v1.7.16
 	github.com/yuin/goldmark-meta v1.1.0
 	gotest.tools/v3 v3.5.2
 )
