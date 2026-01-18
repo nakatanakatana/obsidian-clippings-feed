@@ -1,6 +1,10 @@
 name: CI
 
-on: push
+on:
+  pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
   setup:
@@ -43,9 +47,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: go test ./... -v -coverprofile=coverage.txt -covermode=atomic
-      - uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage.txt
-          flags: unittests
+      - run: go test ./... -v -coverprofile=coverage.out -covermode=atomic
+      - uses: k1LoW/octocov-action@v1
