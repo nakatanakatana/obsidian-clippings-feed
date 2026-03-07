@@ -362,31 +362,30 @@ func TestGenerateFeeds(t *testing.T) {
 func createMarkdownContent(meta clippingsfeed.Metadata) string {
 	var content strings.Builder
 	content.WriteString("---\n")
-	content.WriteString(fmt.Sprintf("title: \"%s\"\n", meta.Title))
-	content.WriteString(fmt.Sprintf("site: \"%s\"\n", meta.Site))
-	content.WriteString(fmt.Sprintf("source: \"%s\"\n", meta.Source))
+	fmt.Fprintf(&content, "title: \"%s\"\n", meta.Title)
+	fmt.Fprintf(&content, "site: \"%s\"\n", meta.Site)
+	fmt.Fprintf(&content, "source: \"%s\"\n", meta.Source)
 
 	if len(meta.Author) > 0 {
 		content.WriteString("author:\n")
 		for _, author := range meta.Author {
-			content.WriteString(fmt.Sprintf("  - \"%s\"\n", author))
+			fmt.Fprintf(&content, "  - \"%s\"\n", author)
 		}
 	}
-
-	content.WriteString(fmt.Sprintf("published: \"%s\"\n", meta.Published))
-	content.WriteString(fmt.Sprintf("created: %s\n", meta.Created.Format(time.RFC3339)))
-	content.WriteString(fmt.Sprintf("description: \"%s\"\n", meta.Description))
+	fmt.Fprintf(&content, "published: \"%s\"\n", meta.Published)
+	fmt.Fprintf(&content, "created: %s\n", meta.Created.Format(time.RFC3339))
+	fmt.Fprintf(&content, "description: \"%s\"\n", meta.Description)
 
 	if len(meta.Tags) > 0 {
 		content.WriteString("tags:\n")
 		for _, tag := range meta.Tags {
-			content.WriteString(fmt.Sprintf("  - \"%s\"\n", tag))
+			fmt.Fprintf(&content, "  - \"%s\"\n", tag)
 		}
 	}
 
 	content.WriteString("---\n\n")
-	content.WriteString("# " + meta.Title + "\n\n")
-	content.WriteString(meta.Description + "\n")
+	fmt.Fprintf(&content, "# %s\n\n", meta.Title)
+	fmt.Fprintf(&content, "%s\n", meta.Description)
 
 	return content.String()
 }
