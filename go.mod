@@ -4,7 +4,7 @@ go 1.24.3
 
 require (
 	github.com/caarlos0/env/v11 v11.4.1
-	github.com/fsnotify/fsnotify v1.10.0
+	github.com/fsnotify/fsnotify v1.10.1
 	github.com/gorilla/feeds v1.2.0
 	github.com/yuin/goldmark v1.8.2
 	github.com/yuin/goldmark-meta v1.1.0
