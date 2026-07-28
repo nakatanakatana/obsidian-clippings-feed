@@ -8,6 +8,7 @@ require (
 	github.com/gorilla/feeds v1.2.0
 	github.com/yuin/goldmark v1.8.5
 	github.com/yuin/goldmark-meta v1.1.0
+	github.com/yuin/goldmark-meta/v2 v2.0.0
 	gotest.tools/v3 v3.5.2
 )
 
