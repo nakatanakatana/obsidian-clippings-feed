@@ -1,6 +1,6 @@
 module github.com/nakatanakatana/obsidian-clippings-feed
 
-go 1.24.3
+go 1.25
 
 require (
 	github.com/caarlos0/env/v11 v11.4.1
@@ -8,7 +8,6 @@ require (
 	github.com/gorilla/feeds v1.2.0
 	github.com/yuin/goldmark v1.8.5
 	github.com/yuin/goldmark-meta v1.1.0
-	github.com/yuin/goldmark-meta/v2 v2.0.0
 	gotest.tools/v3 v3.5.2
 )
 
