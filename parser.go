@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yuin/goldmark"
-	meta "github.com/yuin/goldmark-meta"
-	"github.com/yuin/goldmark/text"
+	meta "github.com/yuin/goldmark-meta/v2"
+	"github.com/yuin/goldmark/v2/ast"
+	"github.com/yuin/goldmark/v2/parser"
 )
 
 type Metadata struct {
@@ -21,20 +21,23 @@ type Metadata struct {
 	Tags        []string  `json:"tags"`
 }
 
-func CreateParser() goldmark.Markdown {
-	return goldmark.New(
-		goldmark.WithExtensions(
-			meta.New(
-				meta.WithStoresInDocument(),
-			),
+func CreateParser() parser.Parser {
+	return parser.New(
+		parser.WithExtensions(
+			meta.Parser,
 		),
 	)
 }
 
-func ParseMeta(md goldmark.Markdown, source string) (*Metadata, error) {
-	document := md.Parser().Parse(text.NewReader([]byte(source)))
+func ParseMeta(p parser.Parser, source string) (*Metadata, error) {
+	document := p.ParseStringSource(source)
 
-	jsonString, err := json.Marshal(document.OwnerDocument().Meta())
+	doc, ok := document.(*ast.Document)
+	if !ok {
+		return nil, fmt.Errorf("failed to cast to ast.Document")
+	}
+
+	jsonString, err := json.Marshal(doc.Metadata())
 	if err != nil {
 		return nil, fmt.Errorf("marshal Error: %w", err)
 	}

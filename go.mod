@@ -6,13 +6,13 @@ require (
 	github.com/caarlos0/env/v11 v11.4.1
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/gorilla/feeds v1.2.0
-	github.com/yuin/goldmark v1.8.5
-	github.com/yuin/goldmark-meta v1.1.0
+	github.com/yuin/goldmark-meta/v2 v2.0.2
+	github.com/yuin/goldmark/v2 v2.0.0
 	gotest.tools/v3 v3.5.2
 )
 
 require (
 	github.com/google/go-cmp v0.5.9 // indirect
+	go.yaml.in/yaml/v4 v4.0.0-rc.6 // indirect
 	golang.org/x/sys v0.13.0 // indirect
-	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
