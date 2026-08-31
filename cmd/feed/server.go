@@ -12,13 +12,13 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	clippingsfeed "github.com/nakatanakatana/obsidian-clippings-feed"
-	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/v2/parser"
 )
 
 type FeedGenerator struct {
 	config        Config
 	tmpDir        string
-	parser        goldmark.Markdown
+	parser        parser.Parser
 	watcher       *fsnotify.Watcher
 	debounceTimer *time.Timer
 }
