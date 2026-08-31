@@ -5,6 +5,9 @@
     "github>aquaproj/aqua-renovate-config#2.13.0"
   ],
   "configMigration": true,
+  "git-submodules": {
+    "enabled": true
+  },
   "platformAutomerge": true,
   "prHourlyLimit": 10,
   "pinDigests": false,
@@ -26,6 +29,13 @@
       "postUpdateOptions": [
         "gomodTidy"
       ]
+    },
+    {
+      "description": "Review LiveSync Bridge submodule updates manually",
+      "matchManagers": [
+        "git-submodules"
+      ],
+      "automerge": false
     }
   ]
 }

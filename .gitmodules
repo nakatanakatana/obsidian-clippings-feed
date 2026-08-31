@@ -1,3 +1,4 @@
 [submodule "livesync-bridge"]
 	path = livesync-bridge
 	url = git@github.com:vrtmrz/livesync-bridge.git
+	branch = main
