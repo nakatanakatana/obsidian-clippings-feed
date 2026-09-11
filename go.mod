@@ -7,7 +7,7 @@ require (
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/gorilla/feeds v1.2.0
 	github.com/yuin/goldmark-meta/v2 v2.0.2
-	github.com/yuin/goldmark/v2 v2.0.1
+	github.com/yuin/goldmark/v2 v2.0.2
 	gotest.tools/v3 v3.5.2
 )
 
